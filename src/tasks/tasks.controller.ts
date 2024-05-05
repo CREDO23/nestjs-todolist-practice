@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -10,13 +11,14 @@ import {
 } from '@nestjs/common';
 import { ITask } from './interfaces/task.interface';
 import { TasksService } from './tasks.service';
+import { CreateTaskDTO } from './dtos/create.dto';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
   @Post()
-  create(@Body() task: ITask) {
+  create(@Body() task: CreateTaskDTO) {
     return this.tasksService.create(task.title, task.body);
   }
 
@@ -26,20 +28,42 @@ export class TasksController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
+  ) {
     return this.tasksService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
     @Body() updated: Partial<Omit<ITask, 'id'>>,
   ) {
     return this.tasksService.update(id, updated);
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
+  delete(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
+  ) {
     return this.tasksService.delete(id);
   }
 }
