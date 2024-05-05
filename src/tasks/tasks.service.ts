@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ITask } from './interfaces/task.interface';
 
 @Injectable()
@@ -18,18 +18,29 @@ export class TasksService {
   }
 
   findAll() {
-    return this.tasks || 'No tasks found';
+    if (!this.tasks) {
+      throw new HttpException(
+        {
+          message: 'No tasks found',
+          status: HttpStatus.NOT_FOUND,
+        },
+        HttpStatus.NOT_FOUND,
+        { cause: 'Task not found' }, // Not serialized in the response body but can be helpful for loggind/debugging
+      );
+    }
+
+    return this.tasks;
   }
 
   findOne(id: number) {
     if (!this.tasks) {
-      return 'No tasks found';
+      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
     }
 
     const task = this.tasks.find((task) => task.id === id);
 
     if (!task) {
-      return 'Task not found';
+      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
 
     return task;
@@ -37,13 +48,13 @@ export class TasksService {
 
   update(id: number, updated: Partial<Omit<ITask, 'id'>>): ITask | string {
     if (!this.tasks) {
-      return 'No tasks found';
+      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
     }
 
     const task = this.tasks.find((task) => task.id === id);
 
     if (!task) {
-      return 'Task not found';
+      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
 
     this.tasks = this.tasks.map((task) => {
@@ -59,13 +70,13 @@ export class TasksService {
 
   delete(id: number): string {
     if (!this.tasks) {
-      return 'No tasks found';
+      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
     }
 
     const task = this.tasks.find((task) => task.id === id);
 
     if (!task) {
-      return 'Task not found';
+      throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
 
     this.tasks = this.tasks.filter((task) => task.id !== id);

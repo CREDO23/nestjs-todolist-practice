@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Post,
@@ -27,20 +28,42 @@ export class TasksController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
+  ) {
     return this.tasksService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
     @Body() updated: Partial<Omit<ITask, 'id'>>,
   ) {
     return this.tasksService.update(id, updated);
   }
 
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number) {
+  delete(
+    @Param(
+      'id',
+      new ParseIntPipe({
+        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
+      }),
+    )
+    id: number,
+  ) {
     return this.tasksService.delete(id);
   }
 }
