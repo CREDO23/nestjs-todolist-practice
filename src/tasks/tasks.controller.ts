@@ -3,15 +3,14 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
 import { ITask } from './interfaces/task.interface';
 import { TasksService } from './tasks.service';
 import { CreateTaskDTO } from './dtos/create.dto';
+import { ObjectId } from 'mongoose';
 
 @Controller('tasks')
 export class TasksController {
@@ -29,26 +28,16 @@ export class TasksController {
 
   @Get(':id')
   findOne(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
+    @Param('id')
+    id: ObjectId,
   ) {
     return this.tasksService.findOne(id);
   }
 
   @Put(':id')
   update(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
+    @Param('id')
+    id: ObjectId,
     @Body() updated: Partial<Omit<ITask, 'id'>>,
   ) {
     return this.tasksService.update(id, updated);
@@ -56,13 +45,8 @@ export class TasksController {
 
   @Delete(':id')
   delete(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
+    @Param('id')
+    id: ObjectId,
   ) {
     return this.tasksService.delete(id);
   }

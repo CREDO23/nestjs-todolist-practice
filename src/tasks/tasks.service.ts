@@ -1,86 +1,53 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ITask } from './interfaces/task.interface';
+import { InjectModel } from '@nestjs/mongoose';
+import { Task, TaskModel } from './task.schema';
+import { ObjectId } from 'mongoose';
 
 @Injectable()
 export class TasksService {
+  constructor(@InjectModel(Task.name) private taskModel: TaskModel) {}
   private tasks: ITask[];
 
-  create(title: string, body: string): string {
+  async create(title: string, body: string): Promise<Task> {
     const task = { title, body, done: false };
 
-    if (!this.tasks?.length) {
-      this.tasks = [{ id: 1, ...task }];
-    } else {
-      this.tasks.push({ id: this.tasks.length + 1, ...task });
-    }
-
-    return 'Task created successfully';
+    return await this.taskModel.create(task);
   }
 
-  findAll() {
-    if (!this.tasks) {
-      throw new HttpException(
-        {
-          message: 'No tasks found',
-          status: HttpStatus.NOT_FOUND,
-        },
-        HttpStatus.NOT_FOUND,
-        { cause: 'Task not found' }, // Not serialized in the response body but can be helpful for loggind/debugging
-      );
-    }
-
-    return this.tasks;
+  async findAll(): Promise<Task[]> {
+    return await this.taskModel.find();
   }
 
-  findOne(id: number) {
-    if (!this.tasks) {
-      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
-    }
-
-    const task = this.tasks.find((task) => task.id === id);
+  async findOne(id: ObjectId): Promise<Task> {
+    const task = await this.taskModel.findById(id);
 
     if (!task) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
-
     return task;
   }
 
-  update(id: number, updated: Partial<Omit<ITask, 'id'>>): ITask | string {
-    if (!this.tasks) {
-      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
-    }
-
-    const task = this.tasks.find((task) => task.id === id);
+  async update(
+    id: ObjectId,
+    updated: Partial<Omit<ITask, 'id'>>,
+  ): Promise<Task | null> {
+    const task = await this.findOne(id);
 
     if (!task) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
 
-    this.tasks = this.tasks.map((task) => {
-      if (task.id === id) {
-        return { ...task, ...updated };
-      }
-
-      return task;
-    });
-
-    return { ...task, ...updated };
+    return await this.taskModel.findByIdAndUpdate(id, updated, { new: true });
   }
 
-  delete(id: number): string {
-    if (!this.tasks) {
-      throw new HttpException('No tasks found', HttpStatus.NOT_FOUND);
-    }
-
-    const task = this.tasks.find((task) => task.id === id);
+  async delete(id: ObjectId): Promise<Task | null> {
+    const task = await this.findOne(id);
 
     if (!task) {
       throw new HttpException('Task not found', HttpStatus.NOT_FOUND);
     }
 
-    this.tasks = this.tasks.filter((task) => task.id !== id);
-
-    return 'Task deleted successfully';
+    return await this.taskModel.findByIdAndDelete(id);
   }
 }
