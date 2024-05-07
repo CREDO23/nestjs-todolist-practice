@@ -1,9 +1,4 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  RequestMethod,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TasksModule } from './tasks/tasks.module';
 import { LoggerMiddleware } from './comon/middleware/logger.middleware';
 
@@ -12,8 +7,6 @@ import { LoggerMiddleware } from './comon/middleware/logger.middleware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(LoggerMiddleware)
-      .forRoutes({ path: 'tasks', method: RequestMethod.ALL });
+    consumer.apply(LoggerMiddleware);
   }
 }
