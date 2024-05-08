@@ -1,6 +1,5 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TasksModule } from './tasks/tasks.module';
-import { LoggerMiddleware } from './comon/middleware/logger.middleware';
 import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
@@ -11,8 +10,4 @@ import { MongooseModule } from '@nestjs/mongoose';
     TasksModule,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware);
-  }
-}
+export class AppModule {}
