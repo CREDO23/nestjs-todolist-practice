@@ -3,15 +3,15 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
-import { ITask } from './interfaces/task.interface';
 import { TasksService } from './tasks.service';
 import { CreateTaskDTO } from './dtos/create.dto';
+import { ObjectId } from 'mongoose';
+import { UpdateDTO } from './dtos/update.dto';
+import { ParseObjectIdPipe } from 'src/comon/pipes/objectIdValidation.pipe';
 
 @Controller('tasks')
 export class TasksController {
@@ -29,40 +29,25 @@ export class TasksController {
 
   @Get(':id')
   findOne(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
+    @Param('id', ParseObjectIdPipe)
+    id: ObjectId,
   ) {
     return this.tasksService.findOne(id);
   }
 
-  @Put(':id')
+  @Put('update/:id')
   update(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
-    @Body() updated: Partial<Omit<ITask, 'id'>>,
+    @Param('id', ParseObjectIdPipe)
+    id: ObjectId,
+    @Body() updated: UpdateDTO,
   ) {
     return this.tasksService.update(id, updated);
   }
 
-  @Delete(':id')
+  @Delete('delete/:id')
   delete(
-    @Param(
-      'id',
-      new ParseIntPipe({
-        errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE,
-      }),
-    )
-    id: number,
+    @Param('id', ParseObjectIdPipe)
+    id: ObjectId,
   ) {
     return this.tasksService.delete(id);
   }
